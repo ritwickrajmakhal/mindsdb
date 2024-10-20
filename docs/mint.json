@@ -1077,7 +1077,8 @@
               "group": "Image Models",
               "pages": [
                 "integrations/ai-engines/replicate-text2img",
-                "integrations/ai-engines/replicate-img2text"
+                "integrations/ai-engines/replicate-img2text",
+                "integrations/ai-engines/clipdrop"
               ]
             },
             {

@@ -20,7 +20,7 @@ class ClipdropHandler(BaseMLEngine):
     def create_validation(target, args=None, **kwargs):
         args = args['using']
 
-        available_tasks = ["remove_text", "remove_background", "sketch_to_image", "text_to_image", "replace_background", "reimagine"]
+        available_tasks = ["remove_text", "remove_background", "sketch_to_image", "text_to_image", "replace_background", "reimagine", "upscale", "product_photography", "uncrop"]
 
         if 'task' not in args:
             raise Exception(f'task has to be specified. Available tasks are - {available_tasks}')
@@ -41,8 +41,7 @@ class ClipdropHandler(BaseMLEngine):
         self.model_storage.json_set('args', args)
 
     def _get_clipdrop_client(self, args):
-        args["using"] = "clipdrop_engine"
-        api_key = get_api_key('clipdrop', args["using"], self.engine_storage, strict=False)
+        api_key = get_api_key('clipdrop', "clipdrop_engine", self.engine_storage, strict=False)
 
         local_directory_path = args["local_directory_path"]
 
@@ -168,6 +167,69 @@ class ClipdropHandler(BaseMLEngine):
 
         return df[df.columns.intersection(supported_params)].apply(generate_reimagine, client=client, axis=1)
 
+    def _process_upscale(self, df, args):
+
+        def generate_upscale(conds, client):
+            conds = conds.to_dict()
+            return client.upscale(conds.get("image_url"), conds.get("target_width"), conds.get("target_height"))
+
+        supported_params = set(["image_url", "target_width", "target_height"])
+
+        if "image_url" not in df.columns:
+            raise Exception("`image_url` column has to be given in the query.")
+
+        if "target_width" not in df.columns:
+            raise Exception("`target_width column has to be given in the query.`")
+
+        if "target_width" not in df.columns:
+            raise Exception("`target_height column has to be in the query.`")
+
+        for col in df.columns:
+            if col not in supported_params:
+                raise Exception(f"Unknown column {col}. Currently supported parameters for upscale - {supported_params}")
+
+        client = self._get_clipdrop_client(args)
+
+        return df[df.columns.intersection(supported_params)].apply(generate_upscale, client=client, axis=1)
+
+    def _process_product_photography(self, df, args):
+
+        def generate_product_photography(conds, client):
+            conds = conds.to_dict()
+            return client.product_photography(conds.get("image_url"), conds.get("background_color_choice"))
+
+        supported_params = set(["image_url", "background_color_choice"])
+
+        if "image_url" not in df.columns:
+            raise Exception("`image_url` column has to be given in the query.")
+
+        for col in df.columns:
+            if col not in supported_params:
+                raise Exception(f"Unknown column {col}. Currently supported parameters for product photography - {supported_params}")
+
+        client = self._get_clipdrop_client(args)
+
+        return df[df.columns.intersection(supported_params)].apply(generate_product_photography, client=client, axis=1)
+
+    def _process_uncrop(self, df, args):
+
+        def generate_uncrop(conds, client):
+            conds = conds.to_dict()
+            return client.uncrop(conds.get("image_url"), conds.get("extend_left"), conds.get("extend_right"), conds.get("extend_up"), conds.get("extend_down"), conds.get("seed"))
+
+        supported_params = set(["image_url", "extend_left", "extend_right", "extend_up", "extend_down", "seed"])
+
+        if "image_url" not in df.columns:
+            raise Exception("`image_url` column has to be given in the query.")
+
+        for col in df.columns:
+            if col not in supported_params:
+                raise Exception(f"Unknown column {col}. Currently supported parameters for uncrop - {supported_params}")
+
+        client = self._get_clipdrop_client(args)
+
+        return df[df.columns.intersection(supported_params)].apply(generate_uncrop, client=client, axis=1)
+
     def predict(self, df, args=None):
 
         args = self.model_storage.json_get('args')
@@ -184,6 +246,14 @@ class ClipdropHandler(BaseMLEngine):
             preds = self._process_replace_background(df, args)
         elif args["task"] == "reimagine":
             preds = self._process_reimagine(df, args)
+        elif args["task"] == "upscale":
+            preds = self._process_upscale(df, args)
+        elif args["task"] == "product_photography":
+            preds = self._process_product_photography(df, args)
+        elif args["task"] == "uncrop":
+            preds = self._process_uncrop(df, args)
+        else:
+            raise Exception(f"Unknown task {args['task']}")
 
         result_df = pd.DataFrame()
 

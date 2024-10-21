@@ -228,10 +228,118 @@ WHERE image_url = "https://static.clipdrop.co/web/apis/remove-background/input.j
   AND text = "Empty road";
 ```
 
+### Upscale Image
+
+<video
+  width="100%" 
+  height="315"
+  src="https://static.clipdrop.co/web/apis/super-resolution/super-resolution-demo.mp4"
+  title="Video player"
+  style={{ objectFit: 'cover', borderRadius: '8px' }}
+  autoPlay
+  muted
+  loop
+  playsInline
+  controls={false}
+/>
+
+Enhance the resolution of any image with AI-powered upscaling.
+
+```sql
+CREATE MODEL mindsdb.clipdrop_upscale
+PREDICT image
+USING
+  engine = "clipdrop_engine",
+  task = "upscale",
+  local_directory_path = "/Users/Sam/Downloads/test";
+```
+
+Provide an image URL to upscale:
+
+```sql
+SELECT *
+FROM mindsdb.clipdrop_upscale
+WHERE image_url = "https://imgv3.fotor.com/images/slider-image/Blurry-low-quality-female-portrait-picture.jpg"
+  AND target_width = 800
+  AND target_height = 580;
+```
+
+### Product Photography
+
+<video
+  width="100%" 
+  height="315"
+  src="https://static.clipdrop.co/web/apis/product-photography/demo-hd.mp4"
+  title="Video player"
+  style={{ objectFit: 'cover', borderRadius: '8px' }}
+  autoPlay
+  muted
+  loop
+  playsInline
+  controls={false}
+/>
+
+Create professional product photos with AI.
+
+```sql
+CREATE MODEL mindsdb.clipdrop_pp
+PREDICT image
+USING
+  engine = "clipdrop_engine",
+  task = "product_photography",
+  local_directory_path = "/home/ritwickrajmakhal/Clipdrop";
+```
+
+For example:
+
+```sql
+SELECT *
+FROM mindsdb.clipdrop_pp
+WHERE image_url = "https://www.nilkamalfurniture.com/cdn/shop/files/PARDSRDB_SRB_IVR_600x.jpg"
+  AND background_color_choice = "#ff3131"; -- optional
+```
+
+### Uncrop Image
+
+<video
+  width="100%" 
+  height="315"
+  src="https://storage.googleapis.com/clipdrop-static-assets/web/apis/uncrop/flowers-uncrop-high-res.webm"
+  title="Video player"
+  style={{ objectFit: 'cover', borderRadius: '8px' }}
+  autoPlay
+  muted
+  loop
+  playsInline
+  controls={false}
+/>
+
+Recover the lost parts of an image with AI.
+
+```sql
+CREATE MODEL mindsdb.clipdrop_uncrop
+PREDICT image
+USING
+  engine = "clipdrop_engine",
+  task = "uncrop",
+  local_directory_path = "/home/ritwickrajmakhal/Clipdrop";
+```
+
+For example:
+
+```sql
+SELECT *
+FROM mindsdb.clipdrop_uncrop
+WHERE image_url = "https://plugins-media.makeupar.com/smb/blog/author/2024-03-22/7777c9dc-8acf-4a5a-8580-6f8716f31b20.png"
+  AND extend_left = 100 -- optional
+  AND extend_right = 100 -- optional
+  AND extend_up = 100 -- optional
+  AND extend_down = 100 -- optional
+  AND seed = 50; -- optional
+```
+
 <Note>
 
-**Note:** The `local_directory_path` parameter specifies the path to the directory where the images are stored on your local machine.
-
-
+**Note:** The `local_directory_path` is the path where the images will be saved after the transformation. The `image_url` is the URL of the image that needs to be transformed.
 
 </Note>

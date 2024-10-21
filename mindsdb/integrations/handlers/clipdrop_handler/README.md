@@ -15,6 +15,9 @@ The Clipdrop API allows you to integrate best-in-class AI to your apps in minute
   - [x] Generate Image from text
   - [x] Reimagine the Image
   - [x] Replace Background in Image
+  - [x] Upscale Image
+  - [x] Product photography
+  - [x] Uncrop Image
 
 ## Example Usage
 
@@ -36,7 +39,9 @@ The next step is to create a model with a `task` that signifies what type of tra
 - [text_to_image](#generate-image-from-text)
 - [reimagine](#re-imagine-the-image)
 - [replace_background](#replace-background-in-image)
-
+- [upscale](#upscale-image)
+- [product_photography](#product-photography)
+- [uncrop](#uncrop-image)
 
 ## Create a model
 
@@ -144,4 +149,63 @@ WHERE image_url = "https://static.clipdrop.co/web/apis/remove-background/input.j
   AND text = "Empty road";
 ~~~~
 
-**Note:** `task`, `local_directory_path` and `clipdrop_api_key` are mandatory parameters for creating a model. The `clipdrop_api_key` should be provided when createing an ML_ENGINE.
+### Upscale Image
+
+~~~~sql
+CREATE MODEL mindsdb.clipdrop_upscale
+PREDICT image
+USING
+  engine = "clipdrop_engine",
+  task = "upscale",
+  local_directory_path = "/Users/Sam/Downloads/test";
+~~~~
+
+~~~~sql
+SELECT *
+FROM mindsdb.clipdrop_upscale
+WHERE image_url = "https://imgv3.fotor.com/images/slider-image/Blurry-low-quality-female-portrait-picture.jpg"
+  AND target_width = 800
+  AND target_height = 580;
+~~~~
+
+### Product Photography
+
+~~~~sql
+CREATE MODEL mindsdb.clipdrop_pp
+PREDICT image
+USING
+  engine = "clipdrop_engine",
+  task = "product_photography",
+  local_directory_path = "/Users/Sam/Downloads/test";
+~~~~
+
+~~~~sql
+SELECT *
+FROM mindsdb.clipdrop_pp
+WHERE image_url = "https://www.nilkamalfurniture.com/cdn/shop/files/PARDSRDB_SRB_IVR_600x.jpg"
+  AND background_color_choice = "#ffffff"; -- optional
+~~~~
+
+### Uncrop Image
+
+~~~~sql
+CREATE MODEL mindsdb.clipdrop_uncrop
+PREDICT image
+USING
+  engine = "clipdrop_engine",
+  task = "uncrop",
+  local_directory_path = "/Users/Sam/Downloads/test";
+~~~~
+
+~~~~sql
+SELECT *
+FROM mindsdb.clipdrop_uncrop
+WHERE image_url = "https://plugins-media.makeupar.com/smb/blog/author/2024-03-22/7777c9dc-8acf-4a5a-8580-6f8716f31b20.png"
+  AND extend_left = 100 -- optional
+  AND extend_right = 100 -- optional
+  AND extend_up = 100 -- optional
+  AND extend_down = 100 -- optional
+  AND seed = 50; -- optional
+~~~~
+
+**Note:** The `local_directory_path` is the path where the images will be saved after the transformation. The `image_url` is the URL of the image that needs to be transformed.

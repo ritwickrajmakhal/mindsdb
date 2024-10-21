@@ -98,3 +98,30 @@ class ClipdropClient:
             'image_file': ('image.jpg', img_content["content"], f'image/{img_content["img_ext"]}')
         }
         return self.make_request(url, files=files)
+
+    def upscale(self, img_url, target_width, target_height):
+        url = f'{self.base_endpoint}image-upscaling/v1/upscale'
+        img_content = self.download_image(img_url)
+        files = {
+            'image_file': ('image.jpg', img_content["content"], f'image/{img_content["img_ext"]}')
+        }
+        data = {'target_width': target_width, 'target_height': target_height}
+        return self.make_request(url, files=files, data=data)
+
+    def product_photography(self, img_url, background_color_choice=None):
+        url = f'{self.base_endpoint}product-photography/v1'
+        img_content = self.download_image(img_url)
+        files = {
+            'image_file': ('image.jpg', img_content["content"], f'image/{img_content["img_ext"]}')
+        }
+        data = {'background_color_choice': background_color_choice}
+        return self.make_request(url, files=files, data=data)
+
+    def uncrop(self, img_url, extend_left=None, extend_right=None, extend_up=None, extend_down=None, seed=None):
+        url = f'{self.base_endpoint}uncrop/v1'
+        img_content = self.download_image(img_url)
+        files = {
+            'image_file': ('image.jpg', img_content["content"], f'image/{img_content["img_ext"]}')
+        }
+        data = {'extend_left': extend_left, 'extend_right': extend_right, 'extend_up': extend_up, 'extend_down': extend_down, 'seed': seed}
+        return self.make_request(url, files=files, data=data)
